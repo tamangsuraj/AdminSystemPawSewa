@@ -24,26 +24,17 @@ final supabaseProvider = Provider<SupabaseClient>((ref) {
   return Supabase.instance.client;
 });
 
-final authStateProvider = StreamProvider<User?>((ref) {
-  final supabase = ref.watch(supabaseProvider);
-  return supabase.auth.onAuthStateChange.map((data) => data.session?.user);
-});
+// Simple auth state provider that tracks current user
+final currentUserProvider = StateProvider<User?>((ref) => null);
 
 final authNotifierProvider = StateNotifierProvider<AuthNotifier, AsyncValue<User?>>((ref) {
-  return AuthNotifier(ref.watch(supabaseProvider));
+  return AuthNotifier(ref);
 });
 
 class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
-  final SupabaseClient _supabase;
+  final Ref _ref;
 
-  AuthNotifier(this._supabase) : super(const AsyncValue.loading()) {
-    _init();
-  }
-
-  void _init() {
-    final user = _supabase.auth.currentUser;
-    state = AsyncValue.data(user);
-  }
+  AuthNotifier(this._ref) : super(const AsyncValue.data(null));
 
   Future<void> signIn(String email, String password) async {
     state = const AsyncValue.loading();
@@ -64,6 +55,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
         // Simulate delay
         await Future.delayed(const Duration(milliseconds: 800));
         
+        // Update both providers
+        _ref.read(currentUserProvider.notifier).state = mockUser;
         state = AsyncValue.data(mockUser);
         return;
       }
@@ -76,6 +69,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       );
       
       if (response.user != null) {
+        _ref.read(currentUserProvider.notifier).state = response.user;
         state = AsyncValue.data(response.user);
       } else {
         state = const AsyncValue.error('Login failed', StackTrace.empty);
@@ -92,10 +86,17 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
 
   Future<void> signOut() async {
     try {
-      await _supabase.auth.signOut();
+      // Clear user state
+      _ref.read(currentUserProvider.notifier).state = null;
       state = const AsyncValue.data(null);
+      
+      // For real Supabase integration
+      // await _supabase.auth.signOut();
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
     }
   }
+
+  User? get currentUser => _ref.read(currentUserProvider);
+  bool get isLoggedIn => currentUser != null;
 }

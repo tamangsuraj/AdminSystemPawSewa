@@ -7,7 +7,7 @@ class TopBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authStateProvider);
+    final currentUser = ref.watch(currentUserProvider);
 
     return Container(
       height: 70,
@@ -55,8 +55,8 @@ class TopBar extends ConsumerWidget {
           const SizedBox(width: 8),
           
           // User Profile
-          authState.when(
-            data: (user) => PopupMenuButton<String>(
+          if (currentUser != null)
+            PopupMenuButton<String>(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -64,7 +64,7 @@ class TopBar extends ConsumerWidget {
                     radius: 16,
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     child: Text(
-                      user?.email?.substring(0, 1).toUpperCase() ?? 'A',
+                      currentUser.email?.substring(0, 1).toUpperCase() ?? 'A',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 14,
@@ -74,7 +74,7 @@ class TopBar extends ConsumerWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    user?.email?.split('@').first ?? 'Admin',
+                    currentUser.email?.split('@').first ?? 'Admin',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w500,
                     ),
@@ -129,10 +129,9 @@ class TopBar extends ConsumerWidget {
                     break;
                 }
               },
-            ),
-            loading: () => const CircularProgressIndicator(),
-            error: (_, __) => const Icon(Icons.error),
-          ),
+            )
+          else
+            const CircularProgressIndicator(),
         ],
       ),
     );

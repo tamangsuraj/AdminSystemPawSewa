@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,18 +11,24 @@ import '../../shared/presentation/pages/not_found_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
+  final authState = ref.watch(currentUserProvider);
+  
   return GoRouter(
-    initialLocation: '/',
+    initialLocation: '/login',
     redirect: (context, state) {
-      // Check if user is logged in by checking the auth state
-      final authState = ref.read(authNotifierProvider);
-      final isLoggedIn = authState.hasValue && authState.value != null;
+      final user = authState;
+      final isLoggedIn = user != null;
       final isLoginRoute = state.matchedLocation == '/login';
       
+      // Debug print to see what's happening
+      print('Router redirect - isLoggedIn: $isLoggedIn, isLoginRoute: $isLoginRoute, path: ${state.matchedLocation}');
+      
+      // If not logged in and trying to access protected route, redirect to login
       if (!isLoggedIn && !isLoginRoute) {
         return '/login';
       }
       
+      // If logged in and on login page, redirect to dashboard
       if (isLoggedIn && isLoginRoute) {
         return '/';
       }
