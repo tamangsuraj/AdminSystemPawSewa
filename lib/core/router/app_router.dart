@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../../features/appointments/presentation/pages/appointment_details_page.dart';
 import '../../features/orders/presentation/pages/order_details_page.dart';
 import '../../shared/presentation/pages/not_found_page.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/',
     redirect: (context, state) {
-      final isLoggedIn = Supabase.instance.client.auth.currentUser != null;
+      // Check if user is logged in by checking the auth state
+      final authState = ref.read(authNotifierProvider);
+      final isLoggedIn = authState.hasValue && authState.value != null;
       final isLoginRoute = state.matchedLocation == '/login';
       
       if (!isLoggedIn && !isLoginRoute) {

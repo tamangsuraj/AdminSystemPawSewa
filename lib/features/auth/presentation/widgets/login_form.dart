@@ -17,6 +17,14 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   bool _isLoading = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Pre-fill credentials for testing
+    _emailController.text = 'admin@pawsewa.com';
+    _passwordController.text = '1Support';
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
@@ -155,6 +163,48 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Text('Sign In'),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                
+                // Demo Credentials Note
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            size: 16,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Demo Credentials',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Email: admin@pawsewa.com\nPassword: 1Support',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 24),

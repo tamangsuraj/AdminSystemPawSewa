@@ -1,6 +1,25 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+// Mock User class for testing without Supabase
+class MockUser extends User {
+  MockUser({
+    required String id,
+    required Map<String, dynamic> appMetadata,
+    required Map<String, dynamic> userMetadata,
+    required String aud,
+    required String createdAt,
+    String? email,
+  }) : super(
+          id: id,
+          appMetadata: appMetadata,
+          userMetadata: userMetadata,
+          aud: aud,
+          createdAt: createdAt,
+          email: email,
+        );
+}
+
 final supabaseProvider = Provider<SupabaseClient>((ref) {
   return Supabase.instance.client;
 });
@@ -30,6 +49,27 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
     state = const AsyncValue.loading();
     
     try {
+      // Hardcoded credentials for testing
+      if (email.trim().toLowerCase() == 'admin@pawsewa.com' && password == '1Support') {
+        // Simulate successful login with mock user
+        final mockUser = MockUser(
+          id: 'mock-admin-id',
+          appMetadata: {},
+          userMetadata: {'email': email},
+          aud: 'authenticated',
+          createdAt: DateTime.now().toIso8601String(),
+          email: email,
+        );
+        
+        // Simulate delay
+        await Future.delayed(const Duration(milliseconds: 800));
+        
+        state = AsyncValue.data(mockUser);
+        return;
+      }
+      
+      // For real Supabase integration (commented out for now)
+      /*
       final response = await _supabase.auth.signInWithPassword(
         email: email,
         password: password,
@@ -40,6 +80,11 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       } else {
         state = const AsyncValue.error('Login failed', StackTrace.empty);
       }
+      */
+      
+      // If credentials don't match, show error
+      state = const AsyncValue.error('Invalid email or password', StackTrace.empty);
+      
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
     }

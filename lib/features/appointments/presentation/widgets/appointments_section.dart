@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../shared/models/appointment.dart';
 import '../providers/appointments_provider.dart';
 import 'appointments_table.dart';
 import 'appointments_filter_bar.dart';
@@ -110,7 +111,7 @@ class _AppointmentsSectionState extends ConsumerState<AppointmentsSection> {
     );
   }
 
-  List<dynamic> _filterAppointments(List<dynamic> appointments) {
+  List<Appointment> _filterAppointments(List<Appointment> appointments) {
     return appointments.where((appointment) {
       // Search filter
       if (_searchQuery.isNotEmpty) {
